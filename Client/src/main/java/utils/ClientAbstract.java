@@ -1,5 +1,8 @@
 package utils;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import utils.ClientPartEnum;
 import utils.SkierPhase;
 
@@ -20,6 +23,7 @@ public abstract class ClientAbstract {
     private SkierPhase phase1;
     private SkierPhase phase2;
     private SkierPhase phase3;
+
     private static Integer POOL_SIZE = 3;
 
     public ClientAbstract(int numThreads, int numSkiers, int numLifts, int numRuns, String url) {

@@ -31,6 +31,7 @@ public class ClientPart1 extends ClientAbstract {
         System.out.printf("Failure calls: %d\n",totalFailure);
         System.out.printf("Wall time: %d\n",wallTime);
         System.out.printf("Throughput: %.2f\n",throughput);
+        return;
     }
 
 }
