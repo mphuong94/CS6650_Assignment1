@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>C:/Users/001064646/Desktop/Assignment _1/Client/src/main/java</OriginalElement>
+  <nodes>
+    <node x="0.0" y="79.0">Part2.ClientPart2</node>
+    <node x="0.0" y="227.0">utils.RetryStrategy</node>
+    <node x="140.0" y="79.0">Part1.ClientPart1</node>
+    <node x="196.0" y="153.0">utils.ClientPartEnum</node>
+    <node x="60.0" y="0.0">utils.ClientAbstract</node>
+    <node x="183.0" y="227.0">utils.LatencyStat</node>
+    <node x="0.0" y="153.0">utils.PostConnection</node>
+    <node x="165.0" y="301.0">Main</node>
+    <node x="0.0" y="301.0">utils.SkierPhase</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="Part1.ClientPart1" target="utils.ClientAbstract" relationship="GENERALIZATION">
+      <point x="0.0" y="-14.5" />
+      <point x="200.0" y="54.0" />
+      <point x="130.0" y="54.0" />
+      <point x="0.0" y="14.5" />
+    </edge>
+    <edge source="Part2.ClientPart2" target="utils.ClientAbstract" relationship="GENERALIZATION">
+      <point x="0.0" y="-14.5" />
+      <point x="60.0" y="54.0" />
+      <point x="130.0" y="54.0" />
+      <point x="0.0" y="14.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic" zoom="1.0" showDependencies="false" x="172.0" y="215.5" />
+  <SelectedNodes />
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+
