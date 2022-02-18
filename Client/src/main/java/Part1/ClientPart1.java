@@ -26,11 +26,11 @@ public class ClientPart1 extends ClientAbstract {
                 this.getPhase2().getSuccessCount() + this.getPhase3().getSuccessCount();
         int totalFailure = this.getPhase1().getFailureCount() +
                 this.getPhase2().getFailureCount() + this.getPhase3().getFailureCount();
-        long throughput = (totalFailure + totalSuccess)/wallTime;
+        float throughput = (totalFailure + totalSuccess)/wallTime;
         System.out.printf("Success calls: %d\n",totalSuccess);
         System.out.printf("Failure calls: %d\n",totalFailure);
         System.out.printf("Wall time: %d\n",wallTime);
-        System.out.printf("Throughput: %d\n",throughput);
+        System.out.printf("Throughput: %.2f\n",throughput);
     }
 
 }

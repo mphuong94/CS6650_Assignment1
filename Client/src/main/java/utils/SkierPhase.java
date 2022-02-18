@@ -1,8 +1,6 @@
 package utils;
 
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
@@ -212,7 +210,14 @@ public class SkierPhase implements Runnable {
                         this.isComplete.countDown();
                     }
                 }
-                this.startNext.countDown();
+                // uncomment to run without errors
+            // in slow connection
+//            try {
+//                Thread.sleep(5);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+            this.startNext.countDown();
             };
             new Thread(thread).start();
         }
