@@ -131,7 +131,7 @@ public abstract class ClientAbstract {
         System.out.println("Phase 3 started");
         // wait for all threads to finish
         executorService.shutdown();
-        executorService.awaitTermination(60, TimeUnit.SECONDS);
+        executorService.awaitTermination(5, TimeUnit.SECONDS);
         System.out.println("All phases done");
     }
 }

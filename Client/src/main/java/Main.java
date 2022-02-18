@@ -16,6 +16,7 @@ public class Main {
         int numSkiers = 20000;
         int numLifts = 40;
         int numRuns = 10;
+        int part = 0;
 
         if (args.length % 2 != 0) {
             throw new IllegalArgumentException("Some arguments are missing values");
@@ -80,18 +81,21 @@ public class Main {
             if (params.containsKey("--part")) {
                 int partArg = Integer.parseInt(params.get("--part"));
                 if (partArg != 1 && partArg != 2) {
-                    System.out.println("Invalid Client Name to run");
+                    System.out.println("Invalid Client part to run, not included in assignment");
                 } else {
                     if (partArg == 1) {
                         client = new ClientPart1(numThread, numSkiers, numLifts, numRuns, url);
+                        part = 1;
                     } else {
                         client = new ClientPart2(numThread, numSkiers, numLifts, numRuns, url);
+                        part = 2;
                     }
                 }
             } else {
                 throw new IllegalArgumentException("Missing --part arguments");
             }
             System.out.println("Connecting to :" + url);
+            System.out.println("Running Client Part :" + part);
             System.out.printf("Number of threads running: %d\n", numThread);
             System.out.printf("Number of skiers running: %d\n", numSkiers);
             System.out.printf("Number of lifts running: %d\n", numLifts);
@@ -101,7 +105,7 @@ public class Main {
             System.out.println("No command line arguments found.");
             return;
         }
-
+        System.exit(0);
     }
 
 }

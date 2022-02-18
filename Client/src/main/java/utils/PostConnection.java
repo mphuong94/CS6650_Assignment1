@@ -74,8 +74,8 @@ public class PostConnection {
         this.waitTime = waitTime;
     }
 
-    public Record makeConnection() throws IOException {
-        Record result = new Record();
+    public LatencyStat makeConnection() throws IOException {
+        LatencyStat result = new LatencyStat();
         // Try to use just one client to remove bottleneck
         // at the outside of the for loop
 
@@ -105,7 +105,7 @@ public class PostConnection {
             response.close();
             long end = System.currentTimeMillis();
             long latency = end - start;
-            result = new Record(start,requestType,status,latency);
+            result = new LatencyStat(start,requestType,status,latency);
         } catch (HttpException e) {
             System.err.println("Fatal protocol violation: " + e.getMessage());
             e.printStackTrace();

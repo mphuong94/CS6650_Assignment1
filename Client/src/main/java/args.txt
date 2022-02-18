@@ -1,5 +1,13 @@
 # local
 --numThread 32 --numSkiers 20000 --numLifts 40 --numRuns 10 --url http://localhost:8080/ResortServer_war_exploded/skiers/ --part 1
 --numThread 64 --numSkiers 20000 --numLifts 40 --numRuns 10 --url http://localhost:8080/ResortServer_war_exploded/skiers/ --part 1
+--numThread 128 --numSkiers 20000 --numLifts 40 --numRuns 10 --url http://localhost:8080/ResortServer_war_exploded/skiers/ --part 1
+--numThread 256 --numSkiers 20000 --numLifts 40 --numRuns 10 --url http://localhost:8080/ResortServer_war_exploded/skiers/ --part 1
+
+--numThread 32 --numSkiers 20000 --numLifts 40 --numRuns 10 --url http://localhost:8080/ResortServer_war_exploded/skiers/ --part 2
+--numThread 64 --numSkiers 20000 --numLifts 40 --numRuns 10 --url http://localhost:8080/ResortServer_war_exploded/skiers/ --part 2
+--numThread 128 --numSkiers 20000 --numLifts 40 --numRuns 10 --url http://localhost:8080/ResortServer_war_exploded/skiers/ --part 2
+--numThread 256 --numSkiers 20000 --numLifts 40 --numRuns 10 --url http://localhost:8080/ResortServer_war_exploded/skiers/ --part 2
 #EC2
 --numThread 32 --numSkiers 20000 --numLifts 40 --numRuns 10 --url http://52.35.85.82:8080/ResortServer_war/skiers/ --part 1
+--numThread 64 --numSkiers 20000 --numLifts 40 --numRuns 10 --url http://52.35.85.82:8080/ResortServer_war/skiers/ --part 1

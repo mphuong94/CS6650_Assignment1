@@ -1,19 +1,19 @@
 package utils;
 
-public class Record {
+public class LatencyStat {
     private final Long startTime;
     private final String requestType;
     private final Integer responseCode;
     private final Long latency;
 
-    public Record(Long startTime, String requestType, Integer responseCode, Long latency) {
+    public LatencyStat(Long startTime, String requestType, Integer responseCode, Long latency) {
         this.startTime = startTime;
         this.requestType = requestType;
         this.responseCode = responseCode;
         this.latency = latency;
     }
 
-    public Record() {
+    public LatencyStat() {
         this((long)-1,"None",-1,(long)-1);
     }
 
@@ -35,7 +35,7 @@ public class Record {
 
     @Override
     public String toString() {
-        return "Record{" +
+        return "LatencyStat{" +
                 "startTime=" + startTime +
                 ", requestType='" + requestType + '\'' +
                 ", responseCode=" + responseCode +

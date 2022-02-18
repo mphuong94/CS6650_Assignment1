@@ -6,6 +6,9 @@ import org.apache.http.impl.client.HttpClients;
 
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,6 +34,8 @@ public class SkierPhase implements Runnable {
     private CountDownLatch isComplete;
     private CloseableHttpClient client;
 
+    private List<LatencyStat> history = Collections.synchronizedList(new ArrayList<>());
+
     public SkierPhase(Integer numThreads, Integer numSkiers, Integer numLifts, Integer numRuns, Integer range, Integer numRequestToSend, Integer startTime, Integer endTime, String url, ClientPartEnum partChosen) {
         this.numThreads = numThreads;
         this.numSkiers = numSkiers;
@@ -51,80 +56,8 @@ public class SkierPhase implements Runnable {
                 .build();
     }
 
-    public Integer getNumThreads() {
-        return numThreads;
-    }
-
-    public Integer getNumSkiers() {
-        return numSkiers;
-    }
-
-    public Integer getNumLifts() {
-        return numLifts;
-    }
-
-    public Integer getNumRuns() {
-        return numRuns;
-    }
-
-    public Integer getRange() {
-        return range;
-    }
-
-    public Integer getNumRequestToSend() {
-        return numRequestToSend;
-    }
-
-    public Integer getStartTime() {
-        return startTime;
-    }
-
-    public Integer getEndTime() {
-        return endTime;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public ClientPartEnum getPartChosen() {
-        return partChosen;
-    }
-
-    public static double getPercentToStart() {
-        return PERCENT_TO_START;
-    }
-
-    public static int getWaitTimeMax() {
-        return WAIT_TIME_MAX;
-    }
-
-    public CountDownLatch getStartNext() {
-        return startNext;
-    }
-
-    public CountDownLatch getIsComplete() {
-        return isComplete;
-    }
-
-    public void setNumThreads(Integer numThreads) {
-        this.numThreads = numThreads;
-    }
-
-    public void setNumSkiers(Integer numSkiers) {
-        this.numSkiers = numSkiers;
-    }
-
-    public void setNumLifts(Integer numLifts) {
-        this.numLifts = numLifts;
-    }
-
-    public void setNumRuns(Integer numRuns) {
-        this.numRuns = numRuns;
-    }
-
-    public void setRange(Integer range) {
-        this.range = range;
+    public List<LatencyStat> getHistory() {
+        return history;
     }
 
     public void setPartChosen(ClientPartEnum partChosen) {
@@ -161,20 +94,23 @@ public class SkierPhase implements Runnable {
             int waitTime = random.nextInt(WAIT_TIME_MAX);
 
         Runnable thread = () -> {
-
                 // send a number of POST request
                 for (int j = 0; j < this.numRequestToSend; j++) {
                     try {
-                        PostConnection newPost = new PostConnection(this.client, this.url, skierID, liftID, time, waitTime);
-                        Record result = newPost.makeConnection();
+                        PostConnection newPost = new PostConnection(client, url, skierID, liftID, time, waitTime);
+                        LatencyStat result = newPost.makeConnection();
 
-                        if (result.getResponseCode() == HttpStatus.SC_CREATED) {
-                            this.incrementSuccess();
-                        } else {
-                            System.out.println("FAILURE");
-                            this.incrementFailure();
+                        if (this.partChosen == ClientPartEnum.PART1){
+                            if (result.getResponseCode() == HttpStatus.SC_CREATED) {
+                                this.incrementSuccess();
+                            } else {
+                                System.out.println("FAILURE");
+                                this.incrementFailure();
+                            }
                         }
-
+                        else {
+                            this.history.add(result);
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {
@@ -191,14 +127,13 @@ public class SkierPhase implements Runnable {
             };
             new Thread(thread).start();
         }
-        this.isComplete();
+        this.checkComplete();
         try {
             client.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 
     public void isNextReady() {
         try {
@@ -209,7 +144,7 @@ public class SkierPhase implements Runnable {
         }
     }
 
-    public void isComplete() {
+    public void checkComplete() {
         try {
             this.isComplete.await();
         } catch (InterruptedException e) {
