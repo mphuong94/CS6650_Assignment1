@@ -1,5 +1,8 @@
 package utils;
 
+/**
+ * Class to store latency information
+ */
 public class LatencyStat {
     private final Long startTime;
     private final String requestType;

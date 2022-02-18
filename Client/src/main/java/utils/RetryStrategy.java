@@ -5,6 +5,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ServiceUnavailableRetryStrategy;
 import org.apache.http.protocol.HttpContext;
 
+/**
+ * Retry strategy for 5 times if response code is 4XX or 5XX
+ */
 public class RetryStrategy implements ServiceUnavailableRetryStrategy {
     private final static Integer NUM_RETRIES = 5;
     private final static Integer LOWER_BOUND = 3;

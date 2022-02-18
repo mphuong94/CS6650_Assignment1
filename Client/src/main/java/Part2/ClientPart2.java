@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+/**
+ * Part 2: Get statistic of each individual call
+ */
 public class ClientPart2 extends ClientAbstract {
 
     public ClientPart2(int numThreads, int numSkiers, int numLifts, int numRuns, String url) {
@@ -23,12 +26,23 @@ public class ClientPart2 extends ClientAbstract {
         this.getPhase3().setPartChosen(ClientPartEnum.PART2);
     }
 
-    public static long getPercentile(List<Long> numbers, double percent) {
+    /**
+     * Helper method to get percentile
+     * using a sorted list and index
+     * @param numbers
+     * @param percent
+     * @return
+     */
+    private static long getPercentile(List<Long> numbers, double percent) {
         int index = (int) Math.ceil(percent / 100.0 * numbers.size());
         return numbers.get(index - 1);
     }
 
-    public void writeCSV(List<LatencyStat> stats) {
+    /**
+     * Helper method to write LatencyStats into CSV
+     * @param stats
+     */
+    private void writeCSV(List<LatencyStat> stats) {
         File file = new File(this.getNumThreads() + "_output.csv");
         try {
             FileWriter fileWriter = new FileWriter(file);

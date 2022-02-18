@@ -14,6 +14,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class that takes care of making HTTP request
+ * to server
+ */
 public class PostConnection {
     private final CloseableHttpClient client;
     private String url;
@@ -71,6 +75,12 @@ public class PostConnection {
         this.waitTime = waitTime;
     }
 
+    /**
+     * Method to call server and get a response, record latency
+     * @param part
+     * @return LatencyStat
+     * @throws IOException
+     */
     public LatencyStat makeConnection(ClientPartEnum part) throws IOException {
         LatencyStat result = new LatencyStat();
         long start = 0;

@@ -3,6 +3,9 @@ package Part1;
 import utils.ClientAbstract;
 import utils.ClientPartEnum;
 
+/**
+ * Part 1: Get wall time and throughput
+ */
 public class ClientPart1 extends ClientAbstract {
 
     public ClientPart1(int numThreads, int numSkiers, int numLifts, int numRuns, String url) {

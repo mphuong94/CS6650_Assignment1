@@ -4,7 +4,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-
+/**
+ * Abstract class that has common work between 2 parts
+ */
 public abstract class ClientAbstract {
     private static final Integer POOL_SIZE = 3;
     // maximum number of threads to run (numThreads - max 1024)
@@ -133,6 +135,10 @@ public abstract class ClientAbstract {
         return wallTime;
     }
 
+    /**
+     * Main multithreaded function to coordinate the phases
+     * @throws InterruptedException
+     */
     public void run() throws InterruptedException {
         long startTime = System.currentTimeMillis();
         ExecutorService executorService = Executors.newFixedThreadPool(3);

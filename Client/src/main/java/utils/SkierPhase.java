@@ -12,6 +12,10 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Main class to run different threads
+ * and post multiple requests to server
+ */
 public class SkierPhase implements Runnable {
     private static final SecureRandom random = new SecureRandom();
     // Both phase 2 and 3 starts at 20%
@@ -85,6 +89,9 @@ public class SkierPhase implements Runnable {
         return totalCalls;
     }
 
+    /**
+     * Method to make a post request with the defined specifications
+     */
     @Override
     public void run() {
         System.out.println("Number of calls being made: " + this.getTotalCalls());
