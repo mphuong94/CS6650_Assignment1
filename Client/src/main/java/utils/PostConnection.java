@@ -18,13 +18,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PostConnection {
+    private CloseableHttpClient client;
     private String url;
     private Integer skierID;
     private Integer liftID;
     private Integer minuteRange;
     private Integer waitTime;
 
-    public PostConnection(String url, Integer skierID, Integer liftID, Integer minuteRange, Integer waitTime) {
+    public PostConnection(CloseableHttpClient client, String url, Integer skierID, Integer liftID, Integer minuteRange, Integer waitTime) {
+        this.client = client;
         this.url = url;
         this.skierID = skierID;
         this.liftID = liftID;
@@ -74,9 +76,9 @@ public class PostConnection {
 
     public Record makeConnection() throws IOException {
         Record result = new Record();
-        CloseableHttpClient client = HttpClients.custom()
-//                .setRetryHandler(new RequestRetryHandler())
-                .build();
+        // Try to use just one client to remove bottleneck
+        // at the outside of the for loop
+
         HttpPost request = new HttpPost(this.url);
         List<BasicNameValuePair> urlParameters = new ArrayList<>();
 
@@ -87,10 +89,13 @@ public class PostConnection {
 
         HttpEntity postParams = new UrlEncodedFormEntity(urlParameters);
         request.setEntity(postParams);
+        CloseableHttpClient newClient = HttpClients.custom()
+                .setServiceUnavailableRetryStrategy(new RetryStrategy())
+                .build();
 
         try {
             long start = System.currentTimeMillis();
-            CloseableHttpResponse response = client.execute(request);
+            CloseableHttpResponse response = newClient.execute(request);
             int status = response.getStatusLine().getStatusCode();
             String requestType = "POST";
             // Execute the method.
@@ -108,8 +113,7 @@ public class PostConnection {
             System.err.println("Fatal transport error: " + e.getMessage());
             e.printStackTrace();
         } finally {
-            // Release the connection.
-            client.close();
+            newClient.close();
             return result;
         }
     }

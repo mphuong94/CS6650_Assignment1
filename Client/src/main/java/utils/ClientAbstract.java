@@ -1,3 +1,5 @@
+package utils;
+
 import utils.ClientPartEnum;
 import utils.SkierPhase;
 
@@ -36,14 +38,14 @@ public abstract class ClientAbstract {
         this.phase2 = new SkierPhase(this.numThreads,
                 this.numSkiers,this.numLifts,this.numRuns,
                 this.numSkiers/this.numThreads,
-                (int)(this.numRuns*0.6)*(numSkiers/numThreads),
+                (int)((this.numRuns*0.6)*(numSkiers/numThreads)),
                 91,360,
                 this.url, ClientPartEnum.DEFAULT
         );
         this.phase3 = new SkierPhase((int) (this.numThreads*0.1),
                 this.numSkiers,this.numLifts,this.numRuns,
                 this.numSkiers/(this.numThreads/4),
-                (int)0.1*this.numRuns,
+                (int)(0.1*this.numRuns),
                 361,420,
                 this.url, ClientPartEnum.DEFAULT
         );
@@ -123,6 +125,7 @@ public abstract class ClientAbstract {
         this.phase2.isNextReady();
         executorService.submit(this.phase3);
         System.out.println("Phase 3 started");
+        // wait for all threads to finish
         executorService.shutdown();
         executorService.awaitTermination(60, TimeUnit.SECONDS);
         System.out.println("All phases done");

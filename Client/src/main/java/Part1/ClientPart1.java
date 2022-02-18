@@ -1,5 +1,7 @@
+package Part1;
+
+import utils.ClientAbstract;
 import utils.ClientPartEnum;
-import utils.SkierPhase;
 
 public class ClientPart1 extends ClientAbstract {
 

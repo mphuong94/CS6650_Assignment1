@@ -3,6 +3,8 @@ package utils;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 
 import java.security.SecureRandom;
 import java.util.concurrent.CountDownLatch;
@@ -177,6 +179,7 @@ public class SkierPhase implements Runnable {
 
     @Override
     public void run() {
+
         for (int i = 0; i < this.numThreads; i++) {
             int rangeChunk = (int) Math.ceil(this.range / this.numThreads);
             int startRange = i * rangeChunk;
@@ -186,18 +189,22 @@ public class SkierPhase implements Runnable {
             int time = random.nextInt(this.endTime - this.startTime + 1) + this.startTime;
             int waitTime = random.nextInt(WAIT_TIME_MAX);
 
-
         Runnable thread = () -> {
                 // send a number of POST request
                 for (int j = 0; j < this.numRequestToSend; j++) {
                     try {
-                        PostConnection newPost = new PostConnection(this.url, skierID, liftID, time, waitTime);
+                        CloseableHttpClient client = HttpClients.custom()
+                                .setServiceUnavailableRetryStrategy(new RetryStrategy())
+                                .build();
+                        PostConnection newPost = new PostConnection(client, this.url, skierID, liftID, time, waitTime);
                         Record result = newPost.makeConnection();
                         if (result.getResponseCode() == HttpStatus.SC_CREATED) {
                             this.incrementSuccess();
                         } else {
+                            System.out.println("FAILURE");
                             this.incrementFailure();
                         }
+                        client.close();
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {
@@ -205,7 +212,6 @@ public class SkierPhase implements Runnable {
                         this.isComplete.countDown();
                     }
                 }
-                ;
                 this.startNext.countDown();
             };
             new Thread(thread).start();
