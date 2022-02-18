@@ -24,7 +24,7 @@ public class ClientPart2 extends ClientAbstract {
     }
 
     public void writeCSV(List<LatencyStat> stats)  {
-        File file = new File("output.csv");
+        File file = new File(this.getNumThreads() +"_output.csv");
         try{
             FileWriter fileWriter = new FileWriter(file);
             BufferedWriter bufferWriter = new BufferedWriter(fileWriter);
@@ -87,6 +87,7 @@ public class ClientPart2 extends ClientAbstract {
         double minLatency = total.get(0);
         double maxLatency = total.get(total.size()-1);
         float throughput = this.getTotalCalls()/wallTime;
+        System.out.println("Wall time "+ wallTime);
         System.out.println("****LATENCY STATISTIC****");
         System.out.printf("Mean: %.2f\n",mean);
         System.out.printf("Median: %.2f\n",median);

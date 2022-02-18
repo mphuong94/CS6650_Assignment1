@@ -103,18 +103,17 @@ public class SkierPhase implements Runnable {
                     try {
                         PostConnection newPost = new PostConnection(client, url, skierID, liftID, time, waitTime);
                         LatencyStat result = newPost.makeConnection();
-
-                        if (this.partChosen == ClientPartEnum.PART1){
-                            if (result.getResponseCode() == HttpStatus.SC_CREATED) {
-                                this.incrementSuccess();
-                            } else {
-                                System.out.println("FAILURE");
-                                this.incrementFailure();
-                            }
+                        if (result.getResponseCode() == HttpStatus.SC_CREATED) {
+                            this.incrementSuccess();
+                        } else {
+                            System.out.println("FAILURE");
+                            this.incrementFailure();
                         }
-                        else {
+
+                        if (this.partChosen == ClientPartEnum.PART2){
                             this.history.add(result);
                         }
+
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {

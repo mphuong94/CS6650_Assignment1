@@ -152,7 +152,6 @@ public abstract class ClientAbstract {
                 this.getPhase2().getSuccessCount() + this.getPhase3().getSuccessCount();
         this.totalFailure = this.getPhase1().getFailureCount() +
                 this.getPhase2().getFailureCount() + this.getPhase3().getFailureCount();
-        this.totalCalls = this.getPhase1().getTotalCalls() +
-                this.getPhase2().getTotalCalls() + this.getPhase3().getTotalCalls();
+        this.totalCalls = this.totalSuccess + this.totalFailure;
     }
 }
