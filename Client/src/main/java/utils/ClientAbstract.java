@@ -1,16 +1,12 @@
 package utils;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import utils.ClientPartEnum;
-import utils.SkierPhase;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+
 public abstract class ClientAbstract {
+    private static final Integer POOL_SIZE = 3;
     // maximum number of threads to run (numThreads - max 1024)
     private int numThreads;
     // number of skier to generate lift rides for (numSkiers - max 100000), This is effectively the skier’s ID (skierID)
@@ -26,8 +22,7 @@ public abstract class ClientAbstract {
     private Integer totalSuccess;
     private Integer totalFailure;
     private Integer totalCalls;
-
-    private static Integer POOL_SIZE = 3;
+    private Long wallTime;
 
     public ClientAbstract(int numThreads, int numSkiers, int numLifts, int numRuns, String url) {
         this.numThreads = numThreads;
@@ -35,25 +30,25 @@ public abstract class ClientAbstract {
         this.numLifts = numLifts;
         this.numRuns = numRuns;
         this.url = url;
-        this.phase1 = new SkierPhase(this.numThreads/4,
-                this.numSkiers,this.numLifts,this.numRuns,
-                this.numSkiers/(this.numThreads/4),
-                (int) ((this.numRuns*0.2)*(this.numSkiers/(this.numThreads/4))),
-                1,90,
+        this.phase1 = new SkierPhase(this.numThreads / 4,
+                this.numSkiers, this.numLifts, this.numRuns,
+                this.numSkiers / (this.numThreads / 4),
+                (int) ((this.numRuns * 0.2) * (this.numSkiers / (this.numThreads / 4))),
+                1, 90,
                 this.url, ClientPartEnum.DEFAULT
         );
         this.phase2 = new SkierPhase(this.numThreads,
-                this.numSkiers,this.numLifts,this.numRuns,
-                this.numSkiers/this.numThreads,
-                (int)((this.numRuns*0.6)*(numSkiers/numThreads)),
-                91,360,
+                this.numSkiers, this.numLifts, this.numRuns,
+                this.numSkiers / this.numThreads,
+                (int) ((this.numRuns * 0.6) * (numSkiers / numThreads)),
+                91, 360,
                 this.url, ClientPartEnum.DEFAULT
         );
-        this.phase3 = new SkierPhase((int) (this.numThreads*0.1),
-                this.numSkiers,this.numLifts,this.numRuns,
-                this.numSkiers/(this.numThreads/4),
-                (int)(0.1*this.numRuns),
-                361,420,
+        this.phase3 = new SkierPhase((int) (this.numThreads * 0.1),
+                this.numSkiers, this.numLifts, this.numRuns,
+                this.numSkiers / (this.numThreads / 4),
+                (int) (0.1 * this.numRuns),
+                361, 420,
                 this.url, ClientPartEnum.DEFAULT
         );
     }
@@ -134,8 +129,13 @@ public abstract class ClientAbstract {
         return totalCalls;
     }
 
+    public Long getWallTime() {
+        return wallTime;
+    }
+
     public void run() throws InterruptedException {
-        ExecutorService executorService =  Executors.newFixedThreadPool(3);
+        long startTime = System.currentTimeMillis();
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
         executorService.submit(this.phase1);
         System.out.println("Phase 1 started");
         this.phase1.isNextReady();
@@ -147,6 +147,8 @@ public abstract class ClientAbstract {
         // wait for all threads to finish
         executorService.shutdown();
         executorService.awaitTermination(5, TimeUnit.NANOSECONDS);
+        long endTime = System.currentTimeMillis();
+        this.wallTime = endTime - startTime;
         System.out.println("All phases done");
         this.totalSuccess = this.getPhase1().getSuccessCount() +
                 this.getPhase2().getSuccessCount() + this.getPhase3().getSuccessCount();

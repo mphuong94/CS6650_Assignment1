@@ -13,28 +13,28 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SkierPhase implements Runnable {
-    private Integer numThreads;
-    private Integer numSkiers;
-    private Integer numLifts;
-    private Integer numRuns;
-    private Integer range;
-    private Integer numRequestToSend;
-    private Integer startTime;
-    private Integer endTime;
-    private String url;
+    private static final SecureRandom random = new SecureRandom();
+    // Both phase 2 and 3 starts at 20%
+    private static final double PERCENT_TO_START = 0.2;
+    private static final int WAIT_TIME_MAX = 10;
+    private final Integer numThreads;
+    private final Integer numSkiers;
+    private final Integer numLifts;
+    private final Integer numRuns;
+    private final Integer range;
+    private final Integer numRequestToSend;
+    private final Integer startTime;
+    private final Integer endTime;
+    private final String url;
     private ClientPartEnum partChosen;
     // fields created on init
-    private AtomicInteger successCount;
-    private AtomicInteger failureCount;
-    // Both phase 2 and 3 starts at 20%
-    private static double PERCENT_TO_START = 0.2;
-    private static int WAIT_TIME_MAX = 10;
-    private static final SecureRandom random = new SecureRandom();
-    private CountDownLatch startNext;
-    private CountDownLatch isComplete;
-    private CloseableHttpClient client;
-    private Integer totalCalls;
-    private List<LatencyStat> history = Collections.synchronizedList(new ArrayList<>());
+    private final AtomicInteger successCount;
+    private final AtomicInteger failureCount;
+    private final CountDownLatch startNext;
+    private final CountDownLatch isComplete;
+    private final CloseableHttpClient client;
+    private final Integer totalCalls;
+    private final List<LatencyStat> history = Collections.synchronizedList(new ArrayList<>());
 
     public SkierPhase(Integer numThreads, Integer numSkiers, Integer numLifts, Integer numRuns, Integer range, Integer numRequestToSend, Integer startTime, Integer endTime, String url, ClientPartEnum partChosen) {
         this.numThreads = numThreads;
@@ -50,7 +50,7 @@ public class SkierPhase implements Runnable {
         this.successCount = new AtomicInteger(0);
         this.failureCount = new AtomicInteger(0);
         this.startNext = new CountDownLatch((int) Math.ceil(numThreads * PERCENT_TO_START));
-        this.totalCalls = this.numThreads*this.numRequestToSend;
+        this.totalCalls = this.numThreads * this.numRequestToSend;
         this.isComplete = new CountDownLatch(this.totalCalls);
         this.client = HttpClients.custom()
                 .setServiceUnavailableRetryStrategy(new RetryStrategy())
@@ -97,12 +97,12 @@ public class SkierPhase implements Runnable {
             int time = random.nextInt(this.endTime - this.startTime + 1) + this.startTime;
             int waitTime = random.nextInt(WAIT_TIME_MAX);
 
-        Runnable thread = () -> {
+            Runnable thread = () -> {
                 // send a number of POST request
                 for (int j = 0; j < this.numRequestToSend; j++) {
                     try {
                         PostConnection newPost = new PostConnection(client, url, skierID, liftID, time, waitTime);
-                        LatencyStat result = newPost.makeConnection();
+                        LatencyStat result = newPost.makeConnection(this.partChosen);
                         if (result.getResponseCode() == HttpStatus.SC_CREATED) {
                             this.incrementSuccess();
                         } else {
@@ -110,7 +110,7 @@ public class SkierPhase implements Runnable {
                             this.incrementFailure();
                         }
 
-                        if (this.partChosen == ClientPartEnum.PART2){
+                        if (this.partChosen == ClientPartEnum.PART2) {
                             this.history.add(result);
                         }
 
@@ -126,7 +126,7 @@ public class SkierPhase implements Runnable {
 //            } catch (InterruptedException e) {
 //                e.printStackTrace();
 //            }
-            this.startNext.countDown();
+                this.startNext.countDown();
             };
             new Thread(thread).start();
         }

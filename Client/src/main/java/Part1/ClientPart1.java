@@ -14,19 +14,17 @@ public class ClientPart1 extends ClientAbstract {
 
     @Override
     public void run() {
-        long startTime = System.currentTimeMillis();
         try {
             super.run();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        long endTime = System.currentTimeMillis();
-        long wallTime = endTime - startTime;
-        float throughput = this.getTotalCalls()/wallTime;
-        System.out.printf("Success calls: %d\n",this.getTotalSuccess());
-        System.out.printf("Failure calls: %d\n",this.getTotalFailure());
-        System.out.printf("Wall time: %d\n",wallTime);
-        System.out.printf("Throughput: %.2f\n",throughput);
+
+        float throughput = this.getTotalCalls() / this.getWallTime();
+        System.out.printf("Success calls: %d\n", this.getTotalSuccess());
+        System.out.printf("Failure calls: %d\n", this.getTotalFailure());
+        System.out.printf("Wall time: %d\n", this.getWallTime());
+        System.out.printf("Throughput: %.2f\n", throughput);
         return;
     }
 

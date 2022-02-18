@@ -1,11 +1,8 @@
 package utils;
 
-import org.apache.commons.httpclient.*;
-import org.apache.commons.httpclient.methods.*;
-import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -13,12 +10,12 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PostConnection {
-    private CloseableHttpClient client;
+    private final CloseableHttpClient client;
     private String url;
     private Integer skierID;
     private Integer liftID;
@@ -74,8 +71,11 @@ public class PostConnection {
         this.waitTime = waitTime;
     }
 
-    public LatencyStat makeConnection() throws IOException {
+    public LatencyStat makeConnection(ClientPartEnum part) throws IOException {
         LatencyStat result = new LatencyStat();
+        long start = 0;
+        long end = 0;
+        long latency = 0;
         // Try to use just one client to remove bottleneck
         // at the outside of the for loop
 
@@ -94,7 +94,9 @@ public class PostConnection {
                 .build();
 
         try {
-            long start = System.currentTimeMillis();
+            if (part == ClientPartEnum.PART2) {
+                start = System.currentTimeMillis();
+            }
             CloseableHttpResponse response = newClient.execute(request);
             int status = response.getStatusLine().getStatusCode();
             String requestType = "POST";
@@ -103,9 +105,11 @@ public class PostConnection {
                 System.err.println("Method failed: " + status);
             }
             response.close();
-            long end = System.currentTimeMillis();
-            long latency = end - start;
-            result = new LatencyStat(start,requestType,status,latency);
+            if (part == ClientPartEnum.PART2) {
+                end = System.currentTimeMillis();
+                latency = end - start;
+            }
+            result = new LatencyStat(start, requestType, status, latency);
         } catch (HttpException e) {
             System.err.println("Fatal protocol violation: " + e.getMessage());
             e.printStackTrace();

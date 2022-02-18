@@ -23,16 +23,21 @@ public class ClientPart2 extends ClientAbstract {
         this.getPhase3().setPartChosen(ClientPartEnum.PART2);
     }
 
-    public void writeCSV(List<LatencyStat> stats)  {
-        File file = new File(this.getNumThreads() +"_output.csv");
-        try{
+    public static long getPercentile(List<Long> numbers, double percent) {
+        int index = (int) Math.ceil(percent / 100.0 * numbers.size());
+        return numbers.get(index - 1);
+    }
+
+    public void writeCSV(List<LatencyStat> stats) {
+        File file = new File(this.getNumThreads() + "_output.csv");
+        try {
             FileWriter fileWriter = new FileWriter(file);
             BufferedWriter bufferWriter = new BufferedWriter(fileWriter);
 
             bufferWriter.write("Start Time, Request Type, Response Code, Latency");
             bufferWriter.newLine();
 
-            for (LatencyStat stat: stats){
+            for (LatencyStat stat : stats) {
                 StringJoiner singleRow = new StringJoiner(",");
                 singleRow.add(stat.getStartTime().toString());
                 singleRow.add(stat.getRequestType());
@@ -49,21 +54,13 @@ public class ClientPart2 extends ClientAbstract {
         }
     }
 
-    public static long getPercentile(List<Long> numbers, double percent) {
-        int index = (int) Math.ceil(percent / 100.0 * numbers.size());
-        return numbers.get(index-1);
-    }
-
     @Override
     public void run() {
-        long startTime = System.currentTimeMillis();
         try {
             super.run();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        long endTime = System.currentTimeMillis();
-        long wallTime = endTime - startTime;
         // Collapse into 1 list
         List<LatencyStat> output = new ArrayList(this.getPhase1().getHistory());
         output.addAll(this.getPhase2().getHistory());
@@ -74,27 +71,27 @@ public class ClientPart2 extends ClientAbstract {
 
         // Print statistic
         List<Long> total = output.stream()
-                        .map(LatencyStat::getLatency)
-                        .filter(x->x>-1)
-                        .collect(Collectors.toList());
+                .map(LatencyStat::getLatency)
+                .filter(x -> x > -1)
+                .collect(Collectors.toList());
         double mean = total.stream()
                 .mapToDouble(d -> d)
                 .average()
                 .orElse(0.0);
         Collections.sort(total);
-        double median = getPercentile(total,50.0);
-        double ninetyNine = getPercentile(total,99.0);
+        double median = getPercentile(total, 50.0);
+        double ninetyNine = getPercentile(total, 99.0);
         double minLatency = total.get(0);
-        double maxLatency = total.get(total.size()-1);
-        float throughput = this.getTotalCalls()/wallTime;
-        System.out.println("Wall time "+ wallTime);
+        double maxLatency = total.get(total.size() - 1);
+        float throughput = this.getTotalCalls() / this.getWallTime();
+        System.out.println("Wall time " + this.getWallTime());
         System.out.println("****LATENCY STATISTIC****");
-        System.out.printf("Mean: %.2f\n",mean);
-        System.out.printf("Median: %.2f\n",median);
-        System.out.printf("Throughput: %.2f\n",throughput);
-        System.out.printf("99th percentile: %.2f\n",ninetyNine);
-        System.out.printf("Minimum: %.2f\n",minLatency);
-        System.out.printf("Maximum: %.2f\n",maxLatency);
+        System.out.printf("Mean: %.2f\n", mean);
+        System.out.printf("Median: %.2f\n", median);
+        System.out.printf("Throughput: %.2f\n", throughput);
+        System.out.printf("99th percentile: %.2f\n", ninetyNine);
+        System.out.printf("Minimum: %.2f\n", minLatency);
+        System.out.printf("Maximum: %.2f\n", maxLatency);
         return;
     }
 
