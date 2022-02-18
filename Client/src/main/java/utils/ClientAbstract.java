@@ -146,7 +146,7 @@ public abstract class ClientAbstract {
         System.out.println("Phase 3 started");
         // wait for all threads to finish
         executorService.shutdown();
-        executorService.awaitTermination(5, TimeUnit.SECONDS);
+        executorService.awaitTermination(5, TimeUnit.NANOSECONDS);
         System.out.println("All phases done");
         this.totalSuccess = this.getPhase1().getSuccessCount() +
                 this.getPhase2().getSuccessCount() + this.getPhase3().getSuccessCount();

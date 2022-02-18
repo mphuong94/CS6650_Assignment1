@@ -50,8 +50,8 @@ public class SkierPhase implements Runnable {
         this.successCount = new AtomicInteger(0);
         this.failureCount = new AtomicInteger(0);
         this.startNext = new CountDownLatch((int) Math.ceil(numThreads * PERCENT_TO_START));
-        this.isComplete = new CountDownLatch(numThreads*numRequestToSend);
         this.totalCalls = this.numThreads*this.numRequestToSend;
+        this.isComplete = new CountDownLatch(this.totalCalls);
         this.client = HttpClients.custom()
                 .setServiceUnavailableRetryStrategy(new RetryStrategy())
                 .build();
