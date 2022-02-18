@@ -22,13 +22,9 @@ public class ClientPart1 extends ClientAbstract {
         }
         long endTime = System.currentTimeMillis();
         long wallTime = endTime - startTime;
-        int totalSuccess = this.getPhase1().getSuccessCount() +
-                this.getPhase2().getSuccessCount() + this.getPhase3().getSuccessCount();
-        int totalFailure = this.getPhase1().getFailureCount() +
-                this.getPhase2().getFailureCount() + this.getPhase3().getFailureCount();
-        float throughput = (totalFailure + totalSuccess)/wallTime;
-        System.out.printf("Success calls: %d\n",totalSuccess);
-        System.out.printf("Failure calls: %d\n",totalFailure);
+        float throughput = this.getTotalCalls()/wallTime;
+        System.out.printf("Success calls: %d\n",this.getTotalSuccess());
+        System.out.printf("Failure calls: %d\n",this.getTotalFailure());
         System.out.printf("Wall time: %d\n",wallTime);
         System.out.printf("Throughput: %.2f\n",throughput);
         return;

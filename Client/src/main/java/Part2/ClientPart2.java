@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
@@ -46,17 +47,23 @@ public class ClientPart2 extends ClientAbstract {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    public static long getPercentile(List<Long> numbers, double percent) {
+        int index = (int) Math.ceil(percent / 100.0 * numbers.size());
+        return numbers.get(index-1);
     }
 
     @Override
     public void run() {
+        long startTime = System.currentTimeMillis();
         try {
             super.run();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
+        long endTime = System.currentTimeMillis();
+        long wallTime = endTime - startTime;
         // Collapse into 1 list
         List<LatencyStat> output = new ArrayList(this.getPhase1().getHistory());
         output.addAll(this.getPhase2().getHistory());
@@ -64,14 +71,30 @@ public class ClientPart2 extends ClientAbstract {
 
         // Write CSV
         this.writeCSV(output);
+
+        // Print statistic
         List<Long> total = output.stream()
                         .map(LatencyStat::getLatency)
                         .filter(x->x>-1)
                         .collect(Collectors.toList());
-
-
-
-
+        double mean = total.stream()
+                .mapToDouble(d -> d)
+                .average()
+                .orElse(0.0);
+        Collections.sort(total);
+        double median = getPercentile(total,50.0);
+        double ninetyNine = getPercentile(total,99.0);
+        double minLatency = total.get(0);
+        double maxLatency = total.get(total.size()-1);
+        float throughput = this.getTotalCalls()/wallTime;
+        System.out.println("****LATENCY STATISTIC****");
+        System.out.printf("Mean: %.2f\n",mean);
+        System.out.printf("Median: %.2f\n",median);
+        System.out.printf("Throughput: %.2f\n",throughput);
+        System.out.printf("99th percentile: %.2f\n",ninetyNine);
+        System.out.printf("Minimum: %.2f\n",minLatency);
+        System.out.printf("Maximum: %.2f\n",maxLatency);
+        return;
     }
 
 }

@@ -33,7 +33,7 @@ public class SkierPhase implements Runnable {
     private CountDownLatch startNext;
     private CountDownLatch isComplete;
     private CloseableHttpClient client;
-
+    private Integer totalCalls;
     private List<LatencyStat> history = Collections.synchronizedList(new ArrayList<>());
 
     public SkierPhase(Integer numThreads, Integer numSkiers, Integer numLifts, Integer numRuns, Integer range, Integer numRequestToSend, Integer startTime, Integer endTime, String url, ClientPartEnum partChosen) {
@@ -51,6 +51,7 @@ public class SkierPhase implements Runnable {
         this.failureCount = new AtomicInteger(0);
         this.startNext = new CountDownLatch((int) Math.ceil(numThreads * PERCENT_TO_START));
         this.isComplete = new CountDownLatch(numThreads*numRequestToSend);
+        this.totalCalls = this.numThreads*this.numRequestToSend;
         this.client = HttpClients.custom()
                 .setServiceUnavailableRetryStrategy(new RetryStrategy())
                 .build();
@@ -80,10 +81,13 @@ public class SkierPhase implements Runnable {
         return failureCount.get();
     }
 
+    public Integer getTotalCalls() {
+        return totalCalls;
+    }
 
     @Override
     public void run() {
-        System.out.println("Number of calls being made: " + this.numThreads*this.numRequestToSend);
+        System.out.println("Number of calls being made: " + this.getTotalCalls());
         for (int i = 0; i < this.numThreads; i++) {
             int rangeChunk = (int) Math.ceil(this.range / this.numThreads);
             int startRange = i * rangeChunk;

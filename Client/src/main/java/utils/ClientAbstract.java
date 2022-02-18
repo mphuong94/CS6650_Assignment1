@@ -23,6 +23,9 @@ public abstract class ClientAbstract {
     private SkierPhase phase1;
     private SkierPhase phase2;
     private SkierPhase phase3;
+    private Integer totalSuccess;
+    private Integer totalFailure;
+    private Integer totalCalls;
 
     private static Integer POOL_SIZE = 3;
 
@@ -119,6 +122,18 @@ public abstract class ClientAbstract {
         this.phase3 = phase3;
     }
 
+    public Integer getTotalSuccess() {
+        return totalSuccess;
+    }
+
+    public Integer getTotalFailure() {
+        return totalFailure;
+    }
+
+    public Integer getTotalCalls() {
+        return totalCalls;
+    }
+
     public void run() throws InterruptedException {
         ExecutorService executorService =  Executors.newFixedThreadPool(3);
         executorService.submit(this.phase1);
@@ -133,5 +148,11 @@ public abstract class ClientAbstract {
         executorService.shutdown();
         executorService.awaitTermination(5, TimeUnit.SECONDS);
         System.out.println("All phases done");
+        this.totalSuccess = this.getPhase1().getSuccessCount() +
+                this.getPhase2().getSuccessCount() + this.getPhase3().getSuccessCount();
+        this.totalFailure = this.getPhase1().getFailureCount() +
+                this.getPhase2().getFailureCount() + this.getPhase3().getFailureCount();
+        this.totalCalls = this.getPhase1().getTotalCalls() +
+                this.getPhase2().getTotalCalls() + this.getPhase3().getTotalCalls();
     }
 }
