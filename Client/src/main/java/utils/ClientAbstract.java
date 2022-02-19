@@ -152,7 +152,7 @@ public abstract class ClientAbstract {
         System.out.println("Phase 3 started");
         // wait for all threads to finish
         executorService.shutdown();
-        executorService.awaitTermination(5, TimeUnit.NANOSECONDS);
+        executorService.awaitTermination(1000, TimeUnit.NANOSECONDS);
         long endTime = System.currentTimeMillis();
         this.wallTime = endTime - startTime;
         System.out.println("All phases done");
