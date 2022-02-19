@@ -98,8 +98,7 @@ public class SkierPhase implements Runnable {
         for (int i = 0; i < this.numThreads; i++) {
             int rangeChunk = (int) Math.ceil(this.range / this.numThreads);
             int startRange = i * rangeChunk;
-            int endRange = startRange + rangeChunk;
-            int skierID = random.nextInt(endRange - startRange + 1) + startRange;
+            int skierID = random.nextInt(rangeChunk) + startRange + 1;
             int liftID = Math.abs(random.nextInt());
             int time = random.nextInt(this.endTime - this.startTime + 1) + this.startTime;
             int waitTime = random.nextInt(WAIT_TIME_MAX);
