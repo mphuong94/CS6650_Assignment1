@@ -22,8 +22,8 @@ public class ClientPart1 extends ClientAbstract {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        float throughput = this.getTotalCalls() / this.getWallTime();
+        double MILLISECOND_TO_SECOND = 0.001;
+        float throughput = (float) (this.getTotalCalls() / (this.getWallTime()*MILLISECOND_TO_SECOND));
         System.out.printf("Success calls: %d\n", this.getTotalSuccess());
         System.out.printf("Failure calls: %d\n", this.getTotalFailure());
         System.out.printf("Wall time: %d\n", this.getWallTime());

@@ -97,7 +97,8 @@ public class ClientPart2 extends ClientAbstract {
         double ninetyNine = getPercentile(total, 99.0);
         double minLatency = total.get(0);
         double maxLatency = total.get(total.size() - 1);
-        float throughput = this.getTotalCalls() / this.getWallTime();
+        double MILLISECOND_TO_SECOND = 0.001;
+        float throughput = (float) (this.getTotalCalls() / (this.getWallTime()*MILLISECOND_TO_SECOND));
         System.out.println("Wall time " + this.getWallTime());
         System.out.println("****LATENCY STATISTIC****");
         System.out.printf("Mean: %.2f\n", mean);
