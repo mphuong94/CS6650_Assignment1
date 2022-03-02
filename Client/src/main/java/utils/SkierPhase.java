@@ -9,6 +9,8 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -35,7 +37,7 @@ public class SkierPhase implements Runnable {
     private final CountDownLatch startNext;
     private final CountDownLatch isComplete;
     private final Integer totalCalls;
-    private final List<LatencyStat> history = Collections.synchronizedList(new ArrayList<>());
+    Map<Long, LatencyStat> history = new ConcurrentHashMap<Long, LatencyStat>();
     CloseableHttpClient client;
     private ClientPartEnum partChosen;
 
@@ -65,7 +67,8 @@ public class SkierPhase implements Runnable {
     }
 
     public List<LatencyStat> getHistory() {
-        return history;
+        List<LatencyStat> historyList = new ArrayList<LatencyStat>(this.history.values());
+        return historyList;
     }
 
     public void setPartChosen(ClientPartEnum partChosen) {
@@ -110,11 +113,13 @@ public class SkierPhase implements Runnable {
                         } else {
                             System.out.println("FAILURE");
                         }
-                        this.isComplete.countDown();
+
 
                         if (this.partChosen == ClientPartEnum.PART2) {
-                            this.history.add(result);
+                            this.history.put(this.isComplete.getCount(),result);
                         }
+
+                        this.isComplete.countDown();
 
                     } catch (Exception e) {
                         e.printStackTrace();
