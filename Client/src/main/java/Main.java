@@ -1,6 +1,10 @@
 import Part1.ClientPart1;
 import Part2.ClientPart2;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import utils.ClientAbstract;
+import utils.RetryStrategy;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,12 +14,21 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
         // Default value
         String url = "http://localhost:8080/ResortServer_war_exploded/skiers/";
-//      String url = "http://52.35.85.82:8080/ResortServer_war/skiers/";
+//      String url = "http://LB-1463899760.us-west-2.elb.amazonaws.com:8080/ResortServer_war/skiers/";
         int numThread = 32;
         int numSkiers = 20000;
         int numLifts = 40;
         int numRuns = 10;
         int part = 0;
+
+        PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
+        connManager.setMaxTotal(100);
+        connManager.setDefaultMaxPerRoute(5);
+        CloseableHttpClient httpClient = HttpClients.custom()
+                .setConnectionManager(connManager)
+                .setServiceUnavailableRetryStrategy(new RetryStrategy())
+                .build();
+
 
         if (args.length % 2 != 0) {
             throw new IllegalArgumentException("Some arguments are missing values");
@@ -83,10 +96,10 @@ public class Main {
                     System.out.println("Invalid Client part to run, not included in assignment");
                 } else {
                     if (partArg == 1) {
-                        client = new ClientPart1(numThread, numSkiers, numLifts, numRuns, url);
+                        client = new ClientPart1(numThread, numSkiers, numLifts, numRuns, url, httpClient);
                         part = 1;
                     } else {
-                        client = new ClientPart2(numThread, numSkiers, numLifts, numRuns, url);
+                        client = new ClientPart2(numThread, numSkiers, numLifts, numRuns, url, httpClient);
                         part = 2;
                     }
                 }

@@ -1,5 +1,7 @@
 package utils;
 
+import org.apache.http.impl.client.CloseableHttpClient;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -25,33 +27,35 @@ public abstract class ClientAbstract {
     private Integer totalFailure;
     private Integer totalCalls;
     private Long wallTime;
+    CloseableHttpClient client;
 
-    public ClientAbstract(int numThreads, int numSkiers, int numLifts, int numRuns, String url) {
+    public ClientAbstract(int numThreads, int numSkiers, int numLifts, int numRuns, String url, CloseableHttpClient client) {
         this.numThreads = numThreads;
         this.numSkiers = numSkiers;
         this.numLifts = numLifts;
         this.numRuns = numRuns;
         this.url = url;
+        this.client = client;
         this.phase1 = new SkierPhase(this.numThreads / 4,
                 this.numSkiers, this.numLifts, this.numRuns,
                 this.numSkiers / (this.numThreads / 4),
                 (int) ((this.numRuns * 0.2) * (this.numSkiers / (this.numThreads / 4))),
                 1, 90,
-                this.url, ClientPartEnum.DEFAULT
+                this.url, ClientPartEnum.DEFAULT,this.client
         );
         this.phase2 = new SkierPhase(this.numThreads,
                 this.numSkiers, this.numLifts, this.numRuns,
                 this.numSkiers / this.numThreads,
                 (int) ((this.numRuns * 0.6) * (numSkiers / numThreads)),
                 91, 360,
-                this.url, ClientPartEnum.DEFAULT
+                this.url, ClientPartEnum.DEFAULT,this.client
         );
         this.phase3 = new SkierPhase((int) (this.numThreads * 0.1),
                 this.numSkiers, this.numLifts, this.numRuns,
                 this.numSkiers / (this.numThreads / 4),
                 (int) (0.1 * this.numRuns),
                 361, 420,
-                this.url, ClientPartEnum.DEFAULT
+                this.url, ClientPartEnum.DEFAULT,this.client
         );
     }
 
@@ -158,8 +162,8 @@ public abstract class ClientAbstract {
         System.out.println("All phases done");
         this.totalSuccess = this.getPhase1().getSuccessCount() +
                 this.getPhase2().getSuccessCount() + this.getPhase3().getSuccessCount();
-        this.totalFailure = this.getPhase1().getFailureCount() +
-                this.getPhase2().getFailureCount() + this.getPhase3().getFailureCount();
-        this.totalCalls = this.totalSuccess + this.totalFailure;
+        this.totalCalls = this.getPhase1().getTotalCalls() +
+                this.getPhase2().getTotalCalls() + this.getPhase3().getTotalCalls();
+        this.totalFailure = this.totalCalls - this.totalSuccess;
     }
 }

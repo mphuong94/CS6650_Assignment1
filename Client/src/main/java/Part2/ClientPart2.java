@@ -1,5 +1,6 @@
 package Part2;
 
+import org.apache.http.impl.client.CloseableHttpClient;
 import utils.ClientAbstract;
 import utils.ClientPartEnum;
 import utils.LatencyStat;
@@ -19,8 +20,8 @@ import java.util.stream.Collectors;
  */
 public class ClientPart2 extends ClientAbstract {
 
-    public ClientPart2(int numThreads, int numSkiers, int numLifts, int numRuns, String url) {
-        super(numThreads, numSkiers, numLifts, numRuns, url);
+    public ClientPart2(int numThreads, int numSkiers, int numLifts, int numRuns, String url, CloseableHttpClient client) {
+        super(numThreads, numSkiers, numLifts, numRuns, url, client);
         this.getPhase1().setPartChosen(ClientPartEnum.PART2);
         this.getPhase2().setPartChosen(ClientPartEnum.PART2);
         this.getPhase3().setPartChosen(ClientPartEnum.PART2);

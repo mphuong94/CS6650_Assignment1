@@ -33,14 +33,12 @@ public class SkierPhase implements Runnable {
     private ClientPartEnum partChosen;
     // fields created on init
     private final AtomicInteger successCount;
-    private final AtomicInteger failureCount;
     private final CountDownLatch startNext;
-    private final CountDownLatch isComplete;
-    private final CloseableHttpClient client;
+    CloseableHttpClient client;
     private final Integer totalCalls;
     private final List<LatencyStat> history = Collections.synchronizedList(new ArrayList<>());
 
-    public SkierPhase(Integer numThreads, Integer numSkiers, Integer numLifts, Integer numRuns, Integer range, Integer numRequestToSend, Integer startTime, Integer endTime, String url, ClientPartEnum partChosen) {
+    public SkierPhase(Integer numThreads, Integer numSkiers, Integer numLifts, Integer numRuns, Integer range, Integer numRequestToSend, Integer startTime, Integer endTime, String url, ClientPartEnum partChosen, CloseableHttpClient client) {
         this.numThreads = numThreads;
         this.numSkiers = numSkiers;
         this.numLifts = numLifts;
@@ -52,13 +50,9 @@ public class SkierPhase implements Runnable {
         this.url = url;
         this.partChosen = partChosen;
         this.successCount = new AtomicInteger(0);
-        this.failureCount = new AtomicInteger(0);
         this.startNext = new CountDownLatch((int) Math.ceil(numThreads * PERCENT_TO_START));
         this.totalCalls = this.numThreads * this.numRequestToSend;
-        this.isComplete = new CountDownLatch(this.totalCalls);
-        this.client = HttpClients.custom()
-                .setServiceUnavailableRetryStrategy(new RetryStrategy())
-                .build();
+        this.client = client;
     }
 
     public List<LatencyStat> getHistory() {
@@ -77,13 +71,6 @@ public class SkierPhase implements Runnable {
         return successCount.get();
     }
 
-    public void incrementFailure() {
-        failureCount.getAndIncrement();
-    }
-
-    public int getFailureCount() {
-        return failureCount.get();
-    }
 
     public Integer getTotalCalls() {
         return totalCalls;
@@ -113,7 +100,6 @@ public class SkierPhase implements Runnable {
                             this.incrementSuccess();
                         } else {
                             System.out.println("FAILURE");
-                            this.incrementFailure();
                         }
 
                         if (this.partChosen == ClientPartEnum.PART2) {
@@ -122,8 +108,6 @@ public class SkierPhase implements Runnable {
 
                     } catch (Exception e) {
                         e.printStackTrace();
-                    } finally {
-                        this.isComplete.countDown();
                     }
                 }
                 // uncomment to run in slow connection
@@ -136,12 +120,6 @@ public class SkierPhase implements Runnable {
             };
             new Thread(thread).start();
         }
-        this.checkComplete();
-        try {
-            client.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public void isNextReady() {
@@ -149,15 +127,6 @@ public class SkierPhase implements Runnable {
             this.startNext.await();
         } catch (InterruptedException e) {
             System.err.println("Next Phase Countdown Latch Exception");
-            e.printStackTrace();
-        }
-    }
-
-    public void checkComplete() {
-        try {
-            this.isComplete.await();
-        } catch (InterruptedException e) {
-            System.err.println("Completion Countdown Latch Exception");
             e.printStackTrace();
         }
     }

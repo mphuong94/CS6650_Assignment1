@@ -7,7 +7,6 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
@@ -19,7 +18,7 @@ import java.util.List;
  * to server
  */
 public class PostConnection {
-    private final CloseableHttpClient client;
+    CloseableHttpClient client;
     private String url;
     private Integer skierID;
     private Integer liftID;
@@ -99,26 +98,23 @@ public class PostConnection {
 
         HttpEntity postParams = new UrlEncodedFormEntity(urlParameters);
         request.setEntity(postParams);
-        CloseableHttpClient newClient = HttpClients.custom()
-                .setServiceUnavailableRetryStrategy(new RetryStrategy())
-                .build();
 
         try {
             if (part == ClientPartEnum.PART2) {
                 start = System.currentTimeMillis();
             }
-            CloseableHttpResponse response = newClient.execute(request);
+            CloseableHttpResponse response = this.client.execute(request);
             int status = response.getStatusLine().getStatusCode();
             String requestType = "POST";
             // Execute the method.
             if (status != HttpStatus.SC_CREATED) {
                 System.err.println("Method failed: " + status);
             }
-            response.close();
             if (part == ClientPartEnum.PART2) {
                 end = System.currentTimeMillis();
                 latency = end - start;
             }
+            response.close();
             result = new LatencyStat(start, requestType, status, latency);
         } catch (HttpException e) {
             System.err.println("Fatal protocol violation: " + e.getMessage());
@@ -127,7 +123,6 @@ public class PostConnection {
             System.err.println("Fatal transport error: " + e.getMessage());
             e.printStackTrace();
         } finally {
-            newClient.close();
             return result;
         }
     }

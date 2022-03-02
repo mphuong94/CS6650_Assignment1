@@ -1,5 +1,6 @@
 package Part1;
 
+import org.apache.http.impl.client.CloseableHttpClient;
 import utils.ClientAbstract;
 import utils.ClientPartEnum;
 
@@ -8,8 +9,16 @@ import utils.ClientPartEnum;
  */
 public class ClientPart1 extends ClientAbstract {
 
-    public ClientPart1(int numThreads, int numSkiers, int numLifts, int numRuns, String url) {
-        super(numThreads, numSkiers, numLifts, numRuns, url);
+//    public ClientPart1(int numThreads, int numSkiers, int numLifts, int numRuns, String url) {
+//        super(numThreads, numSkiers, numLifts, numRuns, url);
+//        this.getPhase1().setPartChosen(ClientPartEnum.PART1);
+//        this.getPhase2().setPartChosen(ClientPartEnum.PART1);
+//        this.getPhase3().setPartChosen(ClientPartEnum.PART1);
+//    }
+
+
+    public ClientPart1(int numThreads, int numSkiers, int numLifts, int numRuns, String url, CloseableHttpClient client) {
+        super(numThreads, numSkiers, numLifts, numRuns, url, client);
         this.getPhase1().setPartChosen(ClientPartEnum.PART1);
         this.getPhase2().setPartChosen(ClientPartEnum.PART1);
         this.getPhase3().setPartChosen(ClientPartEnum.PART1);
