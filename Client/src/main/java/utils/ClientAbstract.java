@@ -1,9 +1,5 @@
 package utils;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
 /**
  * Abstract class that has common work between 2 parts
  */

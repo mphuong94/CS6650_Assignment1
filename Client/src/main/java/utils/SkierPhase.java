@@ -9,8 +9,6 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -37,7 +35,7 @@ public class SkierPhase implements Runnable {
     private final CountDownLatch startNext;
     private final CountDownLatch isComplete;
     private final Integer totalCalls;
-    Map<Long, LatencyStat> history = new ConcurrentHashMap<Long, LatencyStat>();
+    private final List<LatencyStat> history = Collections.synchronizedList(new ArrayList<>());
     CloseableHttpClient client;
     private ClientPartEnum partChosen;
 
@@ -67,8 +65,7 @@ public class SkierPhase implements Runnable {
     }
 
     public List<LatencyStat> getHistory() {
-        List<LatencyStat> historyList = new ArrayList<LatencyStat>(this.history.values());
-        return historyList;
+        return history;
     }
 
     public void setPartChosen(ClientPartEnum partChosen) {
@@ -116,7 +113,7 @@ public class SkierPhase implements Runnable {
 
 
                         if (this.partChosen == ClientPartEnum.PART2) {
-                            this.history.put(this.isComplete.getCount(),result);
+                            this.history.add(result);
                         }
 
                         this.isComplete.countDown();
@@ -125,12 +122,6 @@ public class SkierPhase implements Runnable {
                         e.printStackTrace();
                     }
                 }
-                // uncomment to run in slow connection
-//            try {
-//                Thread.sleep(5);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
                 this.startNext.countDown();
             };
             new Thread(thread).start();
