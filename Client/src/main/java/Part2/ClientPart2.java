@@ -1,6 +1,5 @@
 package Part2;
 
-import org.apache.http.impl.client.CloseableHttpClient;
 import utils.ClientAbstract;
 import utils.ClientPartEnum;
 import utils.LatencyStat;
@@ -20,8 +19,8 @@ import java.util.stream.Collectors;
  */
 public class ClientPart2 extends ClientAbstract {
 
-    public ClientPart2(int numThreads, int numSkiers, int numLifts, int numRuns, String url, CloseableHttpClient client) {
-        super(numThreads, numSkiers, numLifts, numRuns, url, client);
+    public ClientPart2(int numThreads, int numSkiers, int numLifts, int numRuns, String url) {
+        super(numThreads, numSkiers, numLifts, numRuns, url);
         this.getPhase1().setPartChosen(ClientPartEnum.PART2);
         this.getPhase2().setPartChosen(ClientPartEnum.PART2);
         this.getPhase3().setPartChosen(ClientPartEnum.PART2);
@@ -30,6 +29,7 @@ public class ClientPart2 extends ClientAbstract {
     /**
      * Helper method to get percentile
      * using a sorted list and index
+     *
      * @param numbers
      * @param percent
      * @return
@@ -41,6 +41,7 @@ public class ClientPart2 extends ClientAbstract {
 
     /**
      * Helper method to write LatencyStats into CSV
+     *
      * @param stats
      */
     private void writeCSV(List<LatencyStat> stats) {
@@ -99,7 +100,7 @@ public class ClientPart2 extends ClientAbstract {
         double minLatency = total.get(0);
         double maxLatency = total.get(total.size() - 1);
         double MILLISECOND_TO_SECOND = 0.001;
-        float throughput = (float) (this.getTotalCalls() / (this.getWallTime()*MILLISECOND_TO_SECOND));
+        float throughput = (float) (this.getTotalCalls() / (this.getWallTime() * MILLISECOND_TO_SECOND));
         System.out.println("Wall time " + this.getWallTime());
         System.out.println("****LATENCY STATISTIC****");
         System.out.printf("Mean: %.2f\n", mean);

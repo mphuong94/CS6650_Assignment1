@@ -76,6 +76,7 @@ public class PostConnection {
 
     /**
      * Method to call server and get a response, record latency
+     *
      * @param part
      * @return LatencyStat
      * @throws IOException

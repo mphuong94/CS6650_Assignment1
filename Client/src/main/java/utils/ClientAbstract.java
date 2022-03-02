@@ -1,7 +1,5 @@
 package utils;
 
-import org.apache.http.impl.client.CloseableHttpClient;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -27,35 +25,33 @@ public abstract class ClientAbstract {
     private Integer totalFailure;
     private Integer totalCalls;
     private Long wallTime;
-    CloseableHttpClient client;
 
-    public ClientAbstract(int numThreads, int numSkiers, int numLifts, int numRuns, String url, CloseableHttpClient client) {
+    public ClientAbstract(int numThreads, int numSkiers, int numLifts, int numRuns, String url) {
         this.numThreads = numThreads;
         this.numSkiers = numSkiers;
         this.numLifts = numLifts;
         this.numRuns = numRuns;
         this.url = url;
-        this.client = client;
         this.phase1 = new SkierPhase(this.numThreads / 4,
                 this.numSkiers, this.numLifts, this.numRuns,
                 this.numSkiers / (this.numThreads / 4),
                 (int) ((this.numRuns * 0.2) * (this.numSkiers / (this.numThreads / 4))),
                 1, 90,
-                this.url, ClientPartEnum.DEFAULT,this.client
+                this.url, ClientPartEnum.DEFAULT
         );
         this.phase2 = new SkierPhase(this.numThreads,
                 this.numSkiers, this.numLifts, this.numRuns,
                 this.numSkiers / this.numThreads,
                 (int) ((this.numRuns * 0.6) * (numSkiers / numThreads)),
                 91, 360,
-                this.url, ClientPartEnum.DEFAULT,this.client
+                this.url, ClientPartEnum.DEFAULT
         );
         this.phase3 = new SkierPhase((int) (this.numThreads * 0.1),
                 this.numSkiers, this.numLifts, this.numRuns,
                 this.numSkiers / (this.numThreads / 4),
                 (int) (0.1 * this.numRuns),
                 361, 420,
-                this.url, ClientPartEnum.DEFAULT,this.client
+                this.url, ClientPartEnum.DEFAULT
         );
     }
 
@@ -141,22 +137,23 @@ public abstract class ClientAbstract {
 
     /**
      * Main multithreaded function to coordinate the phases
+     *
      * @throws InterruptedException
      */
     public void run() throws InterruptedException {
         long startTime = System.currentTimeMillis();
-        ExecutorService executorService = Executors.newFixedThreadPool(3);
-        executorService.submit(this.phase1);
         System.out.println("Phase 1 started");
+        this.phase1.run();
         this.phase1.isNextReady();
-        executorService.submit(this.phase2);
         System.out.println("Phase 2 started");
+        this.phase2.run();
         this.phase2.isNextReady();
-        executorService.submit(this.phase3);
         System.out.println("Phase 3 started");
+        this.phase3.run();
         // wait for all threads to finish
-        executorService.shutdown();
-        executorService.awaitTermination(1000, TimeUnit.NANOSECONDS);
+        this.phase1.completed();
+        this.phase2.completed();
+        this.phase3.completed();
         long endTime = System.currentTimeMillis();
         this.wallTime = endTime - startTime;
         System.out.println("All phases done");

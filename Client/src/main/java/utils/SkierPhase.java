@@ -3,8 +3,8 @@ package utils;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
-import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,15 +30,16 @@ public class SkierPhase implements Runnable {
     private final Integer startTime;
     private final Integer endTime;
     private final String url;
-    private ClientPartEnum partChosen;
     // fields created on init
     private final AtomicInteger successCount;
     private final CountDownLatch startNext;
-    CloseableHttpClient client;
+    private final CountDownLatch isComplete;
     private final Integer totalCalls;
     private final List<LatencyStat> history = Collections.synchronizedList(new ArrayList<>());
+    CloseableHttpClient client;
+    private ClientPartEnum partChosen;
 
-    public SkierPhase(Integer numThreads, Integer numSkiers, Integer numLifts, Integer numRuns, Integer range, Integer numRequestToSend, Integer startTime, Integer endTime, String url, ClientPartEnum partChosen, CloseableHttpClient client) {
+    public SkierPhase(Integer numThreads, Integer numSkiers, Integer numLifts, Integer numRuns, Integer range, Integer numRequestToSend, Integer startTime, Integer endTime, String url, ClientPartEnum partChosen) {
         this.numThreads = numThreads;
         this.numSkiers = numSkiers;
         this.numLifts = numLifts;
@@ -52,7 +53,15 @@ public class SkierPhase implements Runnable {
         this.successCount = new AtomicInteger(0);
         this.startNext = new CountDownLatch((int) Math.ceil(numThreads * PERCENT_TO_START));
         this.totalCalls = this.numThreads * this.numRequestToSend;
-        this.client = client;
+        this.isComplete = new CountDownLatch(this.totalCalls);
+        PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
+        connManager.setMaxTotal(20000);
+        connManager.setDefaultMaxPerRoute(500);
+        CloseableHttpClient httpClient = HttpClients.custom()
+                .setConnectionManager(connManager)
+                .setServiceUnavailableRetryStrategy(new RetryStrategy())
+                .build();
+        this.client = httpClient;
     }
 
     public List<LatencyStat> getHistory() {
@@ -83,7 +92,7 @@ public class SkierPhase implements Runnable {
     public void run() {
         System.out.println("Number of calls being made: " + this.getTotalCalls());
         for (int i = 0; i < this.numThreads; i++) {
-            int rangeChunk = (int) Math.ceil(this.range / this.numThreads);
+            int rangeChunk = (int) Math.ceil(this.numSkiers/this.range);
             int startRange = i * rangeChunk;
             int skierID = random.nextInt(rangeChunk) + startRange + 1;
             int liftID = Math.abs(random.nextInt());
@@ -101,6 +110,7 @@ public class SkierPhase implements Runnable {
                         } else {
                             System.out.println("FAILURE");
                         }
+                        this.isComplete.countDown();
 
                         if (this.partChosen == ClientPartEnum.PART2) {
                             this.history.add(result);
@@ -125,6 +135,15 @@ public class SkierPhase implements Runnable {
     public void isNextReady() {
         try {
             this.startNext.await();
+        } catch (InterruptedException e) {
+            System.err.println("Next Phase Countdown Latch Exception");
+            e.printStackTrace();
+        }
+    }
+
+    public void completed() {
+        try {
+            this.isComplete.await();
         } catch (InterruptedException e) {
             System.err.println("Next Phase Countdown Latch Exception");
             e.printStackTrace();

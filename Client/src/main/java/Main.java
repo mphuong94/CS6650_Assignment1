@@ -1,10 +1,6 @@
 import Part1.ClientPart1;
 import Part2.ClientPart2;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import utils.ClientAbstract;
-import utils.RetryStrategy;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,15 +16,6 @@ public class Main {
         int numLifts = 40;
         int numRuns = 10;
         int part = 0;
-
-        PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
-        connManager.setMaxTotal(100);
-        connManager.setDefaultMaxPerRoute(5);
-        CloseableHttpClient httpClient = HttpClients.custom()
-                .setConnectionManager(connManager)
-                .setServiceUnavailableRetryStrategy(new RetryStrategy())
-                .build();
-
 
         if (args.length % 2 != 0) {
             throw new IllegalArgumentException("Some arguments are missing values");
@@ -96,10 +83,10 @@ public class Main {
                     System.out.println("Invalid Client part to run, not included in assignment");
                 } else {
                     if (partArg == 1) {
-                        client = new ClientPart1(numThread, numSkiers, numLifts, numRuns, url, httpClient);
+                        client = new ClientPart1(numThread, numSkiers, numLifts, numRuns, url);
                         part = 1;
                     } else {
-                        client = new ClientPart2(numThread, numSkiers, numLifts, numRuns, url, httpClient);
+                        client = new ClientPart2(numThread, numSkiers, numLifts, numRuns, url);
                         part = 2;
                     }
                 }

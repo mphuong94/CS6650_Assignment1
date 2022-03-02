@@ -17,7 +17,7 @@ public class LatencyStat {
     }
 
     public LatencyStat() {
-        this((long)-1,"None",-1,(long)-1);
+        this((long) -1, "None", -1, (long) -1);
     }
 
     public Long getStartTime() {
